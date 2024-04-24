@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  node-service:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    environment:
+      - "DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}"
+      - "DB_DATABASE: ${DB_DATABASE}"
+      - "DB_USERNAME: ${DB_USERNAME}"
+      - "DB_PASSWORD: ${DB_PASSWORD}"
+      - "DB_HOST: ${DB_HOST}"
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:latest
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
+    environment:
+      - "MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_DATABASE: ${MYSQL_DATABASE}"
+      - "MYSQL_USER: ${MYSQL_USER}"
+      - "MYSQL_PASSWORD: ${MYSQL_PASSWORD}"
+      - "MYSQL_HOST: ${MYSQL_HOST}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/db/init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx:latest
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/docker/nginx/nginx.conf
+    depends_on:
+      - node-service
