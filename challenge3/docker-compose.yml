@@ -11,12 +11,12 @@ services:
       - "DB_USERNAME: ${DB_USERNAME}"
       - "DB_PASSWORD: ${DB_PASSWORD}"
       - "DB_HOST: ${DB_HOST}"
-    ports:
-      - "3000:3000"
     env_file:
       - .env
     depends_on:
       - db
+    deploy:
+      replicas: 3
 
   db:
     image: mariadb:latest
